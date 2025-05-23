@@ -1,0 +1,11 @@
+rouge-chinese
+jieba
+transformers==4.39.3
+torch>=2.0.0
+accelerate==0.28.0
+sentencepiece==0.1.99
+protobuf==3.20.3
+scipy
+numpy
+tqdm
+carbontracker
