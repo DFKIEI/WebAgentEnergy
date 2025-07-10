@@ -27,11 +27,14 @@ from transformers import (
     AutoProcessor,
     AutoModelForCausalLM,
 )
+from PIL import Image
+
 class ModelAdapterForMind2Web:
 
     def __init__(self, model_name, gpus: str):
         original_model_name = model_name
-        model_config = yaml.load(open(f"{guibench_root_path}/configs/llava_onevision_7b.yaml"), Loader=yaml.FullLoader)
+        #model_config = yaml.load(open(f"{guibench_root_path}/configs/llava_onevision_7b.yaml"), Loader=yaml.FullLoader)
+        model_config = yaml.load(open("VisualWebBench/configs/qwen_vl.yaml"), Loader=yaml.FullLoader)
         model_path = model_config.get('model_path')
         if args.model_path is not None:
             model_path = args.model_path
@@ -39,7 +42,9 @@ class ModelAdapterForMind2Web:
             model_config['conv_mode'] = args.conv_mode
         tokenizer_path = model_config.get('tokenizer_path', model_path)
         
-        device = f"cuda:{gpus}"
+        #device = f"cuda:{gpus}"
+        device = "cuda:0" if torch.cuda.is_available() else "cpu"
+
 
         model_name = model_name
         print('model_name = ', model_name)
@@ -75,7 +80,7 @@ class ModelAdapterForMind2Web:
         else:
             tokenizer = AutoTokenizer.from_pretrained(
                 tokenizer_path, 
-                trust_remote_code=True
+                trust_remote_code=True,
             )
             model = AutoModelForCausalLM.from_pretrained(
                 model_path,
@@ -84,6 +89,8 @@ class ModelAdapterForMind2Web:
                 trust_remote_code=True,
             )
             model_adapter = getattr(model_adapters, model_config['model_adapter'])(model, tokenizer)
+
+            print(model_adapter)
 
         self.model_adapter = model_adapter
 
@@ -99,7 +106,13 @@ class ModelAdapterForMind2Web:
                     {'role': 'user', 'content': prompt1}
                 ]
             }
-            answer1 = self.model_adapter.generate(message_dict, image_path, 'mind2web', max_new_tokens=max_new_tokens)
+            try:
+                image = Image.open(image_path).convert("RGB")
+            except Exception as e:
+                print(f"Failed to load image {image_path}: {e}")
+                return "Image loading error"
+
+            answer1 = self.model_adapter.generate(message_dict, image, 'mind2web', max_new_tokens=max_new_tokens)
             return answer1
 
 def main(args):
@@ -128,24 +141,34 @@ def main(args):
             if args.mod is not None and args.mod_base is not None and idx % args.mod_base != args.mod:
                 continue
 
-            # print(f"Start testing: {task_type} {action_file}")
+            print(f"Start testing: {task_type} {action_file}")
 
             to_file = os.path.join(to_dir, f'{action_file}_predictions_{exp_split}.jsonl')
             if os.path.exists(to_file):
-                # print("Prediction already exist")
+                print("Prediction already exists")
                 continue
+
             query_meta_data = []
+            jsonl_path = os.path.join(cur_source_data_path, action_file, "queries.jsonl")
+
             try:
-                with open(os.path.join(cur_source_data_path, action_file, "queries.jsonl")) as reader:
-                    for obj in reader:
-                        query_meta_data.append(json.loads(obj))
+                with open(jsonl_path, "r", encoding="utf-8") as reader:
+                    for line_number, line in enumerate(reader, start=1):
+                        try:
+                            query_meta_data.append(json.loads(line))
+                        except json.JSONDecodeError as e:
+                            print(f"[ERROR] Malformed JSON at line {line_number} in {jsonl_path}: {e}")
+                            print(f"  >> {line.strip()}")
+                            raise  # Reraise to trigger outer except and skip the whole file
             except Exception as e:
-                print(f"not standard jsonl file! {os.path.join(cur_source_data_path, action_file, 'queries.jsonl')}")
+                print(f"[SKIP] Not a standard JSONL file or failed to load: {jsonl_path}")
+                print(f"Reason: {e}")
                 continue
+
             predictions = []
             for query_id, query in enumerate(query_meta_data):
-                # print("-" * 10)
-                # print(os.path.splitext(os.path.basename(action_file))[0] + "-" + str(query_id))
+                print("-" * 10)
+                print(os.path.splitext(os.path.basename(action_file))[0] + "-" + str(query_id))
                 image_path = query['image_path'] + "/" + str(query_id) + ".jpg"
                 image_path = image_path.replace('../', '')
                 image_path = image_path.replace('./', '')
@@ -181,7 +204,7 @@ if __name__ == '__main__':
     parser.add_argument('--model_name', type=str, default='llava_7b')  # 'model_name' in GUIBench repo
     parser.add_argument('--model_path', type=str, default=None)  # used by finetuned llava in WebLLaVA repo
     parser.add_argument('--conv_mode', type=str, default=None)  # # used by finetuned llava in WebLLaVA repo
-    parser.add_argument('--gpus', type=int, default=1)
+    parser.add_argument('--gpu_index', type=int, default=0)
     parser.add_argument('--debug', action='store_true')
     # parser.add_argument('--task_types', type=str, default='test_task,test_website,test_domain')
     parser.add_argument('--task_types', type=str, default='test_website')
@@ -189,12 +212,16 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     exp_split = "bbox_generate"
-    guibench_root_path = './../../GUIBench-/'
-    generation_model = ModelAdapterForMind2Web(args.model_name, args.gpus)
+    guibench_root_path = './../../GUIBench/'
+    generation_model = ModelAdapterForMind2Web(args.model_name, args.gpu_index)
     data_name = 'bbox_generate_gt_crop_offline_data_-1choices'
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    source_data_path = f"./screenshot_generation/data/{data_name}"
-    source_data_path=os.path.join(base_dir,source_data_path)
+    try:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+    except NameError:
+        base_dir = os.getcwd()
+
+    source_data_path = f"/netscratch/banwari/llm_energy/MultiUI/screenshot_generation/data/Mind2Web_bbox_eval/{data_name}"
+    #source_data_path=os.path.join(base_dir,source_data_path)
     if not args.debug:
         output_path = os.path.join(base_dir, f'../../offline_output_bbox_gt_crop_gen/{data_name}')
     else:
