@@ -12,4 +12,4 @@ python -m pip install --upgrade pip
 #pip install git+https://github.com/huggingface/transformers.git@c030fc891395d11249046e36b9e0219685b33399
 
 # Install remaining requirements
-pip install -r /home/banwari/llm_energy/synatra/evaluation/mind2web/requirements.txt
+pip install -r /path/to/synatra/evaluation/mind2web/requirements.txt

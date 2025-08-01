@@ -2,6 +2,7 @@ import os
 import json
 from transformers import AutoTokenizer, AutoModel
 import torch
+import argparse
 
 #################################### Import carbontracker and apply the fix ---- ONLY NEEDED IF RUNNING ON SLURM CLUSTER
 try:
@@ -31,9 +32,17 @@ except (ImportError, AttributeError) as e:
 ##########################################################################################
 
 # Path where your split folders are located
-data_root = "/netscratch/banwari/Mind2Web/data"
-split_folders = ["test_domain", "test_task", "test_website"]
-output_dir = "/netscratch/banwari/llm_energy/AutoWebGLM/results"
+data_root = "/path/to/your/mind2web"
+# Argument parsing
+parser = argparse.ArgumentParser()
+parser.add_argument("--task_type", type=str, required=True, help="Task type: domain | task | website")
+args = parser.parse_args()
+
+task_type = args.task_type
+assert task_type in ["domain", "task", "website"], f"Invalid task type: {task_type}"
+split_folders = [task_type]
+
+output_dir = "/path/to/AutoWebGLM/results"
 os.makedirs(output_dir, exist_ok=True)
 
 # Load model

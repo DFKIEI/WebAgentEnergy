@@ -4,7 +4,7 @@ import re
 from collections import defaultdict
 
 file_list = [
-    "/home/banwari/llm_energy/synatra/evaluation/mind2web/inference/domain_test_Synatra-CodeLlama_domain_test.json_prediction_codeprompt.jsonl",
+    "/path/to/synatra/evaluation/mind2web/inference/domain_test_Synatra-CodeLlama_domain_test.json_prediction_codeprompt.jsonl",
 ]
 
 

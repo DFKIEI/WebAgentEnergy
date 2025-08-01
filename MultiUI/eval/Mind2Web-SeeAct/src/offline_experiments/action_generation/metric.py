@@ -3,7 +3,7 @@ import os
 from collections import defaultdict
 
 predict_folder = 'Mind2Web-SeeAct/offline_output_bbox_gt_crop_gen/bbox_generate_gt_crop_offline_data_-1choices/qwen2_mind2web/test_website/'
-gt_folder = '/netscratch/banwari/llm_energy/MultiUI/screenshot_generation/data/Mind2Web_bbox_eval/bbox_generate_gt_crop_offline_data_-1choices/test_website/'
+gt_folder = '/path/to/MultiUI/screenshot_generation/data/Mind2Web_bbox_eval/bbox_generate_gt_crop_offline_data_-1choices/test_website/'
 
 def check_overlap(box1, box2):
     x1_1, y1_1, x2_1, y2_1 = box1
@@ -57,7 +57,7 @@ for fn in os.listdir(predict_folder):
         print(f"GT bbox: {gt_coord}")
 
         task_type = gt_folder.strip('/').split("/")[-1]
-        gt_lines_path = os.path.join(f'/netscratch/banwari/llm_energy/MultiUI/screenshot_generation/data/Mind2Web_bbox_eval/offline_data_-1choices/{task_type}/', annotation_id, 'queries.jsonl')
+        gt_lines_path = os.path.join(f'/path/to/MultiUI/screenshot_generation/data/Mind2Web_bbox_eval/offline_data_-1choices/{task_type}/', annotation_id, 'queries.jsonl')
         lines = open(gt_lines_path, 'r').readlines()
         print(f"Loaded {len(lines)} lines from offline GT")
 

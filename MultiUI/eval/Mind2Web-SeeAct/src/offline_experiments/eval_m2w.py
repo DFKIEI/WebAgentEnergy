@@ -34,7 +34,8 @@ class ModelAdapterForMind2Web:
     def __init__(self, model_name, gpus: str):
         original_model_name = model_name
         #model_config = yaml.load(open(f"{guibench_root_path}/configs/llava_onevision_7b.yaml"), Loader=yaml.FullLoader)
-        model_config = yaml.load(open("VisualWebBench/configs/qwen_vl.yaml"), Loader=yaml.FullLoader)
+        #model_config = yaml.load(open("VisualWebBench/configs/qwen_vl.yaml"), Loader=yaml.FullLoader)
+        model_config = yaml.load(open("Mind2Web-SeeAct/GUIBench/configs/qwen2_mind2web.yaml"), Loader=yaml.FullLoader)
         model_path = model_config.get('model_path')
         if args.model_path is not None:
             model_path = args.model_path
@@ -179,15 +180,25 @@ def main(args):
                 except:
                     pass
                 prompt_list = generate_prompt('bbox_generate', task=query['confirmed_task'], previous=query['previous_actions'])
-                # print('image_path = ', image_path)
-                image_format = image_path.split('.')[-1]
-                assert image_format in ['jpg', 'png']
-                output0 = generation_model.generate(
-                    prompt=prompt_list,
-                    image_path=image_path,
-                    turn_number=0,
-                    max_new_tokens=512
-                )
+
+                # Create the full prompt text
+                if len(prompt_list) >= 2:
+                    full_prompt = prompt_list[0] + "\n" + prompt_list[1]  # system + user
+                else:
+                    full_prompt = prompt_list[0] if prompt_list else ""
+
+                try:
+                    output0 = generation_model.model_adapter.generate(
+                        query=full_prompt,
+                        img_path=image_path,
+                        task_type='mind2web',
+                        return_coords=False,
+                        max_new_tokens=512
+                    )
+                except Exception as e:
+                    print(f"Error during generation: {e}")
+                    output0 = "Generation error"
+                    continue
 
                 output_list = [output0]
                 output_jsonl = dict(multichoice_id=query_id, gpt_output=output_list, prompt=prompt_list)
@@ -220,7 +231,7 @@ if __name__ == '__main__':
     except NameError:
         base_dir = os.getcwd()
 
-    source_data_path = f"/netscratch/banwari/llm_energy/MultiUI/screenshot_generation/data/Mind2Web_bbox_eval/{data_name}"
+    source_data_path = f"/path/to/MultiUI/screenshot_generation/data/Mind2Web_bbox_eval/{data_name}"
     #source_data_path=os.path.join(base_dir,source_data_path)
     if not args.debug:
         output_path = os.path.join(base_dir, f'../../offline_output_bbox_gt_crop_gen/{data_name}')

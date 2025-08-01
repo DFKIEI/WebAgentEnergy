@@ -12,5 +12,5 @@ srun -K \
 --container-mounts="/netscratch/$USER:/netscratch/$USER,/ds:/ds:ro,$(pwd):$(pwd),$(pwd)/..:$(pwd)/.." \
 --container-image=/enroot/nvcr.io_nvidia_pytorch_23.12-py3.sqsh \
 --container-workdir="$(pwd)" \
---task-prolog="/home/banwari/llm_energy/synatra/evaluation/mind2web/install.sh" \
-python m2w_code_offline.py website_test.json /netscratch/banwari/llm_energy/Synatra-Models/Synatra-CodeLlama
+--task-prolog="./install.sh" \
+python m2w_code_offline.py website_test.json /path/to/Synatra-Models/Synatra-CodeLlama
