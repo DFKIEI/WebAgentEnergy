@@ -61,5 +61,5 @@ In the Supplementary Material you will find the appendix of our paper and high r
 If you find this dataset useful, please consider citing our paper:
 
 ```
-Citation will be added one available
+Citation will be added once available
 ```
