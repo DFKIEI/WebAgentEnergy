@@ -111,7 +111,6 @@ Synatra_df["agent"] = "Synatra"
 
 combined_df <- rbind(MindAct_df, autowebglm_df, MultiUI, Synapse_df, Synatra_df)
 combined_df
-combined_df <- combined_df[combined_df$GPU != "V100-32GB", ] # something went wrong with the V100 and MultiUI until it is fixed remove it for all Agents
 
 ggplot(combined_df, aes(x = agent, y = Total_Energy, color=GPU)) +
   geom_boxplot() +
@@ -148,7 +147,6 @@ ggplot(combined_df, aes(x = agent, y = Total_Energy, color=GPU)) +
   annotate("text", x = 3, y = 9.5, label = "Energy Consumption")
 ggsave("agent_energy_gpu_v2.pdf", device=cairo_pdf, height=15, width=15, units = "cm")
 
-combined_df$
 df <- combined_df[combined_df$GPU=="H100-PCI",]
 
 print(df, n= 300)

@@ -95,7 +95,6 @@ Synatra_df["agent"] = "Synatra"
 
 combined_df <- rbind(MindAct_df, autowebglm_df, MultiUI, Synapse_df, Synatra_df)
 combined_df
-combined_df <- combined_df[combined_df$GPU != "V100-32GB", ]
 df3<- combined_df %>% group_by(agent, GPU) %>% get_summary_stats(Total_Time)
 df3
 print(df3, n=100)

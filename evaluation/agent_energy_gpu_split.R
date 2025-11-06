@@ -80,7 +80,6 @@ autowebglm_df
 
 combined_df <- rbind(MindAct_df, autowebglm_df, MultiUI, Synapse_df, Synatra_df)
 combined_df
-combined_df <- combined_df[combined_df$GPU != "V100-32GB", ] # something went wrong with the V100 and MultiUI until it is fixed remove it for all GPUs
 
 ggplot(combined_df, aes(x = agent, y = Energy, color=GPU, fill=Split)) +
   geom_boxplot() +
