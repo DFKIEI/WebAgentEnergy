@@ -1,7 +1,7 @@
 <h1>Promoting Sustainable Web Agents: Benchmarking and Estimating Energy Consumption through Empirical and Theoretical Analysis</h1>
 
 This work has been accepted at The 40th Annual AAAI Conference on Artificial Intelligence.
-Code, Supplementary Material, Evaluation and Results for the paper "[Promoting Sustainable Web Agents: Benchmarking and Estimating Energy Consumption through Empirical and Theoretical Analysis](https://google.com)".
+Code, Supplementary Material, Evaluation and Results for the paper "[Promoting Sustainable Web Agents: Benchmarking and Estimating Energy Consumption through Empirical and Theoretical Analysis](https://arxiv.org/abs/2511.04481)".
 
 ## Abstract
 Web agents, like OpenAI's Operator and Google's Project Mariner, are powerful agentic systems pushing the boundaries of Large Language Models (LLM). They can autonomously interact with the internet at the user's behest, such as navigating websites, filling search masks, and comparing price lists.
@@ -61,5 +61,13 @@ In the Supplementary Material you will find the appendix of our paper and high r
 If you find this dataset useful, please consider citing our paper:
 
 ```
-Citation will be added once available
+@misc{krupp2025promotingsustainablewebagents,
+      title={Promoting Sustainable Web Agents: Benchmarking and Estimating Energy Consumption through Empirical and Theoretical Analysis}, 
+      author={Lars Krupp and Daniel Geißler and Vishal Banwari and Paul Lukowicz and Jakob Karolus},
+      year={2025},
+      eprint={2511.04481},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI},
+      url={https://arxiv.org/abs/2511.04481}, 
+}
 ```
